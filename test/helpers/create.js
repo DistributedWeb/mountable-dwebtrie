@@ -1,5 +1,5 @@
 const { promisify } = require('util')
-const Corestore = require('corestore')
+const DWebstore = require('dwebstore')
 const ram = require('random-access-memory')
 
 const MountableHypertrie = require('../..')
@@ -10,7 +10,7 @@ module.exports.create = async function (numTries, opts) {
   const stores = []
 
   for (let i = 0; i < numTries; i++) {
-    const store = new Corestore((opts && opts._storage) || ram, { sparse })
+    const store = new DWebstore((opts && opts._storage) || ram, { sparse })
     await store.ready()
     const feed = store.get()
     const trie = new MountableHypertrie(store, null, { ...opts, sparse, feed })
