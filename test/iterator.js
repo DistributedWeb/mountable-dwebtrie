@@ -362,7 +362,7 @@ test('recursive mount iterator', async t => {
   }
 })
 
-// Duplicated from hypertrie.
+// Duplicated from dwebtrie.
 function toMap (list) {
   const map = {}
   for (var i = 0; i < list.length; i++) {

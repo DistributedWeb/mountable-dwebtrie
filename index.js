@@ -1,9 +1,9 @@
 const p = require('path').posix
 const { EventEmitter } = require('events')
 
-const hypertrie = require('hypertrie')
-const HypercoreProtocol = require('hypercore-protocol')
-const hypercoreCrypto = require('hypercore-crypto')
+const dwebtrie = require('dwebtrie')
+const HypercoreProtocol = require('ddatabase-protocol')
+const hypercoreCrypto = require('ddatabase-crypto')
 const thunky = require('thunky')
 const nanoiterator = require('nanoiterator')
 const toStream = require('nanoiterator/to-stream')
@@ -17,29 +17,29 @@ const Flags = {
   MOUNT: 1
 }
 const MOUNT_PREFIX = '/mounts'
-const OWNER = Symbol('mountable-hypertrie-owner')
+const OWNER = Symbol('mountable-dwebtrie-owner')
 
 class MountableHypertrie extends Nanoresource {
-  constructor (corestore, key, opts = {}) {
+  constructor (dwebstore, key, opts = {}) {
     super()
     if (key && (typeof key === 'string')) key = Buffer.from(key, 'hex')
 
-    this.corestore = corestore
+    this.dwebstore = dwebstore
     this.key = key
     this.discoveryKey = this.key ? hypercoreCrypto.discoveryKey(this.key) : null
     this.opts = opts
     this.sparse = opts.sparse !== false
-    this.subtype = opts.subtype || 'mountable-hypertrie'
+    this.subtype = opts.subtype || 'mountable-dwebtrie'
 
     if (opts.valueEncoding) throw new Error('MountableHypertrie does not currently support a valueEncoding option.')
 
     var feed = this.opts.feed
-    if (!feed) feed = this.corestore.default({ key, ...this.opts })
+    if (!feed) feed = this.dwebstore.default({ key, ...this.opts })
 
     if (feed[OWNER]) {
       this.trie = feed[OWNER]
     } else {
-      this.trie = opts.trie || hypertrie(null, {
+      this.trie = opts.trie || dwebtrie(null, {
         ...opts,
         feed,
         version: null,
@@ -79,7 +79,7 @@ class MountableHypertrie extends Nanoresource {
   }
 
   _open (cb) {
-    this.corestore.ready(err => {
+    this.dwebstore.ready(err => {
       if (err) return cb(err)
       this.trie.ready(err => {
         if (err) return cb(err)
@@ -89,14 +89,14 @@ class MountableHypertrie extends Nanoresource {
         this.emit('feed', this.feed, {
           version: this.opts && this.opts.version
         })
-        this.emit('hypertrie', this.trie)
+        this.emit('dwebtrie', this.trie)
         return cb(null)
       })
     })
   }
 
   _close (cb) {
-    this.corestore.close(err => {
+    this.dwebstore.close(err => {
       this.emit('close')
       return cb(err)
     })
@@ -110,7 +110,7 @@ class MountableHypertrie extends Nanoresource {
     if (versionedTrie) return process.nextTick(cb, null, versionedTrie)
 
     try {
-      var subfeed = this.corestore.get({ ...opts, key,  version: null })
+      var subfeed = this.dwebstore.get({ ...opts, key,  version: null })
     } catch (err) {
       err.badKey = true
       return cb(err)
@@ -120,7 +120,7 @@ class MountableHypertrie extends Nanoresource {
     if (opts && opts.cached) return cb(null, trie)
     var creating = !trie
 
-    trie = trie || new MountableHypertrie(this.corestore, key, {
+    trie = trie || new MountableHypertrie(this.dwebstore, key, {
       ...this.opts,
       feed: subfeed,
       sparse: this.sparse
@@ -128,11 +128,11 @@ class MountableHypertrie extends Nanoresource {
     self._tries.set(keyString, trie)
     if (creating) {
       const onfeed = (feed, opts) => this.emit('feed', feed, opts)
-      const ontrie = trie => this.emit('hypertrie', trie)
+      const ontrie = trie => this.emit('dwebtrie', trie)
       self._unlisteners.push(() => trie.removeListener('feed', onfeed))
-      self._unlisteners.push(() => trie.removeListener('hypertrie', ontrie))
+      self._unlisteners.push(() => trie.removeListener('dwebtrie', ontrie))
       trie.on('feed', onfeed)
-      trie.on('hypertrie', ontrie)
+      trie.on('dwebtrie', ontrie)
     }
 
     if (!trie.opened) {
@@ -218,7 +218,7 @@ class MountableHypertrie extends Nanoresource {
   }
 
   static getMetadata (feed, cb) {
-    return hypertrie.getMetadata(feed, cb)
+    return dwebtrie.getMetadata(feed, cb)
   }
 
   getMetadata (cb) {
@@ -278,7 +278,7 @@ class MountableHypertrie extends Nanoresource {
       if (err) return cb(err)
       const innerPath = pathToMount(path, mountInfo)
       trie.get(innerPath, (err, node) => {
-        // If the subtrie is a MountableHypertrie, use the internal hypertrie for the batch.
+        // If the subtrie is a MountableHypertrie, use the internal dwebtrie for the batch.
         if (trie.trie) trie = trie.trie
         return trie.batch([
           { type: 'del', key: p.join(MOUNT_PREFIX, innerPath), hidden: true },
@@ -465,7 +465,7 @@ class MountableHypertrie extends Nanoresource {
   }
 
   list (prefix, opts, cb) {
-    // Code duplicated from hypertrie.
+    // Code duplicated from dwebtrie.
     if (typeof prefix === 'function') return this.list('', null, prefix)
     if (typeof opts === 'function') return this.list(prefix, null, opts)
 
@@ -543,7 +543,7 @@ class MountableHypertrie extends Nanoresource {
   }
 
   checkout (version) {
-    return new MountableHypertrie(this.corestore, null, {
+    return new MountableHypertrie(this.dwebstore, null, {
       ...this.opts,
       trie: this.trie,
       feed: this.feed,
@@ -702,7 +702,7 @@ class MountableHypertrie extends Nanoresource {
     const stream = new HypercoreProtocol(isInitiator, { ...opts })
     this.ready(err => {
       if (err) return stream.destroy(err)
-      this.corestore.replicate(isInitiator, { ...opts, stream })
+      this.dwebstore.replicate(isInitiator, { ...opts, stream })
     })
     return stream
   }
