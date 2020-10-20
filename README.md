@@ -1,5 +1,5 @@
 # mountable-dwebtrie
-[![Build Status](https://travis-ci.com/distributedweb/mountable-dwebtrie.svg?branch=master)](https://travis-ci.com/distributedweb/mountable-dwebtrie)
+[![Build Status](https://travis-ci.com/DistributedWeb/mountable-dwebtrie.svg?branch=master)](https://travis-ci.com/distributedweb/mountable-dwebtrie)
 
 A DWebtrie wrapper that supports mounting of sub-Hypertries.
 
