@@ -1,7 +1,7 @@
 {
   "name": "mountable-dwebtrie",
   "version": "2.0.0",
-  "description": "A DWebtrie wrapper that supports mounting of other Hypertries",
+  "description": "A dWebTrie wrapper that supports mounting of sub-dWebTries.",
   "main": "index.js",
   "scripts": {
     "test": "tape test/*.js",
@@ -16,12 +16,12 @@
     "mountable",
     "dwebtrie"
   ],
-  "author": "Andrew Osheroff <andrewosh@gmail.com>",
+  "author": "Peeps Labs <peepslabs@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/andrewosh/mountable-dwebtrie/issues"
+    "url": "https://github.com/DistributedWeb/mountable-dwebtrie/issues"
   },
-  "homepage": "https://github.com/andrewosh/mountable-dwebtrie#readme",
+  "homepage": "https://github.com/DistributedWeb/mountable-dwebtrie#readme",
   "devDependencies": {
     "dwebstore": "git://github.com/DistributedWeb/dwebstore.git#07dcea14f69926a77eac535e2a5f05b2676c80ae",
     "raf": "^3.4.1",
