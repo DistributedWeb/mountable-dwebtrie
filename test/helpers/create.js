@@ -2,7 +2,7 @@ const { promisify } = require('util')
 const DWebstore = require('dwebstore')
 const ram = require('random-access-memory')
 
-const MountableHypertrie = require('../..')
+const MountableDWebTrie = require('../..')
 
 module.exports.create = async function (numTries, opts = {}) {
   const sparse = true
@@ -19,7 +19,7 @@ module.exports.create = async function (numTries, opts = {}) {
     const store = mainStore ? mainStore : new DWebstore((opts && opts._storage) || ram, { sparse, ifAvailable })
     await store.ready()
     const feed = store.get()
-    const trie = new MountableHypertrie(store, null, { ...opts, sparse, feed })
+    const trie = new MountableDWebTrie(store, null, { ...opts, sparse, feed })
     await promisify(trie.ready.bind(trie))()
     tries.push(trie)
     stores.push(store)

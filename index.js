@@ -19,7 +19,7 @@ const Flags = {
 const MOUNT_PREFIX = '/mounts'
 const OWNER = Symbol('mountable-dwebtrie-owner')
 
-class MountableHypertrie extends Nanoresource {
+class MountableDWebTrie extends Nanoresource {
   constructor (dwebstore, key, opts = {}) {
     super()
     if (key && (typeof key === 'string')) key = Buffer.from(key, 'hex')
@@ -31,7 +31,7 @@ class MountableHypertrie extends Nanoresource {
     this.sparse = opts.sparse !== false
     this.subtype = opts.subtype || 'mountable-dwebtrie'
 
-    if (opts.valueEncoding) throw new Error('MountableHypertrie does not currently support a valueEncoding option.')
+    if (opts.valueEncoding) throw new Error('MountableDWebTrie does not currently support a valueEncoding option.')
 
     var feed = this.opts.feed
     if (!feed) feed = this.dwebstore.default({ key, ...this.opts })
@@ -120,7 +120,7 @@ class MountableHypertrie extends Nanoresource {
     if (opts && opts.cached) return cb(null, trie)
     var creating = !trie
 
-    trie = trie || new MountableHypertrie(this.dwebstore, key, {
+    trie = trie || new MountableDWebTrie(this.dwebstore, key, {
       ...this.opts,
       feed: subfeed,
       sparse: this.sparse
@@ -189,16 +189,16 @@ class MountableHypertrie extends Nanoresource {
   }
 
   _maybeSetSymbols (node, trie, mountInfo, innerPath) {
-    if (trie && !node[MountableHypertrie.Symbols.TRIE]) node[MountableHypertrie.Symbols.TRIE] = trie
-    if (mountInfo && !node[MountableHypertrie.Symbols.MOUNT]) node[MountableHypertrie.Symbols.MOUNT] = mountInfo
-    if (mountInfo && !node[MountableHypertrie.Symbols.INNER_PATH]) node[MountableHypertrie.Symbols.INNER_PATH] = innerPath
+    if (trie && !node[MountableDWebTrie.Symbols.TRIE]) node[MountableDWebTrie.Symbols.TRIE] = trie
+    if (mountInfo && !node[MountableDWebTrie.Symbols.MOUNT]) node[MountableDWebTrie.Symbols.MOUNT] = mountInfo
+    if (mountInfo && !node[MountableDWebTrie.Symbols.INNER_PATH]) node[MountableDWebTrie.Symbols.INNER_PATH] = innerPath
   }
 
   _getSymbols (node) {
     return {
-      trie: node[MountableHypertrie.Symbols.TRIE],
-      mount: node[MountableHypertrie.Symbols.MOUNT],
-      innerPath: node[MountableHypertrie.Symbols.INNER_PATH]
+      trie: node[MountableDWebTrie.Symbols.TRIE],
+      mount: node[MountableDWebTrie.Symbols.MOUNT],
+      innerPath: node[MountableDWebTrie.Symbols.INNER_PATH]
     }
   }
 
@@ -278,7 +278,7 @@ class MountableHypertrie extends Nanoresource {
       if (err) return cb(err)
       const innerPath = pathToMount(path, mountInfo)
       trie.get(innerPath, (err, node) => {
-        // If the subtrie is a MountableHypertrie, use the internal dwebtrie for the batch.
+        // If the subtrie is a MountableDWebTrie, use the internal dwebtrie for the batch.
         if (trie.trie) trie = trie.trie
         return trie.batch([
           { type: 'del', key: p.join(MOUNT_PREFIX, innerPath), hidden: true },
@@ -543,7 +543,7 @@ class MountableHypertrie extends Nanoresource {
   }
 
   checkout (version) {
-    return new MountableHypertrie(this.dwebstore, null, {
+    return new MountableDWebTrie(this.dwebstore, null, {
       ...this.opts,
       trie: this.trie,
       feed: this.feed,
@@ -708,13 +708,13 @@ class MountableHypertrie extends Nanoresource {
   }
 }
 
-MountableHypertrie.Symbols = MountableHypertrie.prototype.Symbols = {
+MountableDWebTrie.Symbols = MountableDWebTrie.prototype.Symbols = {
   TRIE: Symbol('trie'),
   MOUNT: Symbol('mount'),
   INNER_PATH: Symbol('inner-path')
 }
 
-module.exports = MountableHypertrie
+module.exports = MountableDWebTrie
 
 function putCondition (path, opts) {
   const userCondition = opts && opts.condition

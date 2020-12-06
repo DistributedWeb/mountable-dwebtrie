@@ -3,7 +3,7 @@ const test = require('tape')
 const { create } = require('./helpers/create')
 const { runAll } = require('./helpers/util')
 
-const MountableHypertrie = require('..')
+const MountableDWebTrie = require('..')
 
 
 test('simple single-trie iterator', async t => {
@@ -176,7 +176,7 @@ test('iterator nodes reference correct sub-tries', async t => {
         rootTrie.list({ recursive: true }, (err, l) => {
           t.error(err, 'no error')
           const res = l.reduce((acc, node) => {
-            acc[node.key] = node[MountableHypertrie.Symbols.TRIE].key
+            acc[node.key] = node[MountableDWebTrie.Symbols.TRIE].key
             return acc
           }, {})
           t.same(res, expected, 'trie references are all correct')
